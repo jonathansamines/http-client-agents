@@ -1,0 +1,30 @@
+{
+  "name": "http-client-agents",
+  "version": "1.0.0",
+  "description": "A sandbox to test a few different agent solutions for Node.js across different clients",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonathansamines/http-client-agents.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonathansamines/http-client-agents/issues"
+  },
+  "homepage": "https://github.com/jonathansamines/http-client-agents#readme",
+  "dependencies": {
+    "@hapi/h2o2": "^9.1.0",
+    "@hapi/hapi": "^20.2.1",
+    "@hapi/wreck": "^17.1.0",
+    "axios": "^0.25.0",
+    "got": "^12.0.1",
+    "hpagent": "^0.1.2",
+    "http-proxy-agent": "^5.0.0",
+    "https-proxy-agent": "^5.0.0"
+  }
+}
