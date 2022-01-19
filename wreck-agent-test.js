@@ -7,7 +7,10 @@ const Wreck = require('@hapi/wreck');
 const HTTPProxyAgent = require('http-proxy-agent');
 const HTTPSProxyAgent = require('https-proxy-agent');
 const HPAgent = require('hpagent');
-const LocalAgent = require('./proxy-agent');
+const LocalAgent = require('./local-agent');
+const GlobalAgent = require('global-agent');
+
+const globalAgent = GlobalAgent.createGlobalProxyAgent({ environmentVariableNamespace: '', forceGlobalAgent: false });
 
 const client = Wreck.defaults({
     baseUrl: 'http://127.0.0.1:4100',
@@ -49,40 +52,57 @@ const clientWithLocalAgent = Wreck.defaults({
     },
 });
 
+const clientWithGlobalAgent = Wreck.defaults({
+    baseUrl: 'http://127.0.0.1:4100',
+    agents: {
+        http: http.globalAgent,
+        https: https.globalAgent,
+        httpsAllowUnauthorized: https.globalAgent,
+    },
+});
+
 async function run() {
     // default client
-    const response = await client.get('/hello', { json: true });
 
-    assert.deepStrictEqual(response.payload, { ok: true });
+    const response = await client.get('/hello?client=default', { json: true });
+
+    assert.deepStrictEqual(response.payload, { ok: true, client: 'default' });
     assert.strictEqual(response.res.headers['connection'], 'close');
 
     // client with keep alive
 
-    const responseWithKeepAlive = await clientWithKeepAlive.get('/hello', { json: true });
+    const responseWithKeepAlive = await clientWithKeepAlive.get('/hello?client=keep-alive', { json: true });
 
-    assert.deepStrictEqual(responseWithKeepAlive.payload, { ok: true });
+    assert.deepStrictEqual(responseWithKeepAlive.payload, { ok: true, client: 'keep-alive' });
     assert.strictEqual(responseWithKeepAlive.res.headers['connection'], 'keep-alive');
-    
-    // client with proxy agent
-
-    const responseWithProxyAgent = await clientWithProxyAgent.get('/hello', { json: true });
-
-    assert.deepStrictEqual(responseWithProxyAgent.payload, { ok: true });
-    assert.strictEqual(responseWithProxyAgent.res.headers['connection'], 'close');
 
     // // client with proxy agent
 
-    const responseWithHPAgent = await clientWithHPAgent.get('/hello', { json: true });
+    const responseWithProxyAgent = await clientWithProxyAgent.get('/hello?client=proxy-agent', { json: true });
 
-    assert.deepStrictEqual(responseWithHPAgent.payload, { ok: true });
+    assert.deepStrictEqual(responseWithProxyAgent.payload, { ok: true, client: 'proxy-agent' });
+    assert.strictEqual(responseWithProxyAgent.res.headers['connection'], 'close');
+
+    // client with hp agent (fail)
+
+    const responseWithHPAgent = await clientWithHPAgent.get('/hello?client=hp-agent', { json: true });
+
+    assert.deepStrictEqual(responseWithHPAgent.payload, { ok: true, client: 'hp-agent' });
     assert.strictEqual(responseWithHPAgent.res.headers['connection'], 'close');
 
-    // client with local agent
+    // client with local agent (fail)
 
-    const responseWithLocalAgent = await clientWithLocalAgent.get('/hello', { json: true });
+    const responseWithLocalAgent = await clientWithLocalAgent.get('/hello?client=local-agent', { json: true });
 
-    assert.deepStrictEqual(responseWithLocalAgent.payload, { ok: true });
+    assert.deepStrictEqual(responseWithLocalAgent.payload, { ok: true, client: 'local-agent' });
     assert.strictEqual(responseWithLocalAgent.res.headers['connection'], 'close');
+
+    // client with global agent
+
+    const responseWithGlobalAgent = await clientWithGlobalAgent.get('/hello?client=global-agent', { json: true });
+
+    assert.deepStrictEqual(responseWithGlobalAgent.payload, { ok: true, client: 'global-agent' });
+    assert.strictEqual(responseWithGlobalAgent.res.headers['connection'], 'close');
 }
 
 run()

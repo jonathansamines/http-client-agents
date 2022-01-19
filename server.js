@@ -1,17 +1,27 @@
 'use strict';
 
+const Joi = require('joi');
 const Hapi = require('@hapi/hapi');
 const H202 = require('@hapi/h2o2');
 
 async function createServer(options) {
     const server = Hapi.server(options);
 
+    server.validator(Joi);
+
     server.route({
         method: 'GET',
         path: '/hello',
+        options: {
+            validate: {
+                query: {
+                    client: Joi.string().default('default'),
+                }
+            }
+        },
         handler(request) {
-            request.log(['access'], 'responding hello');
-            return { ok: true };
+            request.log(['access'], 'responding on origin server');
+            return { ok: true, client: request.query.client };
         }
     });
 
@@ -25,15 +35,13 @@ async function createProxy(options) {
     proxy.route({
         method: '*',
         path: '/{p*}',
-        options: {
-            payload: {
-                parse: false,
+        handler: {
+            proxy: {
+                passThrough: true,
+                host: '127.0.0.1',
+                protocol: 'http',
+                port: 4100,
             }
-        },
-        handler(request, h) {
-            request.log(['access'], 'responding proxy');
-
-            return h.proxy({ passThrough: true, host: '127.0.0.1', protocol: 'http', port: 4100 });
         }
     });
 
