@@ -10,7 +10,7 @@ const HPAgent = require('hpagent');
 const LocalAgent = require('./local-agent');
 const GlobalAgent = require('global-agent');
 
-const globalAgent = GlobalAgent.createGlobalProxyAgent({ environmentVariableNamespace: '', forceGlobalAgent: false });
+GlobalAgent.createGlobalProxyAgent({ environmentVariableNamespace: '', forceGlobalAgent: false });
 
 const client = Wreck.defaults({
     baseUrl: 'http://127.0.0.1:4100',
