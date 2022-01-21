@@ -20,7 +20,7 @@ async function createServer(options) {
             }
         },
         handler(request) {
-            request.log(['access'], 'responding on origin server');
+            request.log(['access', 'log'], `server responding to client (${request.query.client}) from proxy (${request.headers?.['l5d-reqid'] ?? 'no proxy'})`);
             return { ok: true, client: request.query.client };
         }
     });
@@ -50,9 +50,9 @@ async function createProxy(options) {
 
 async function run() {
     const server = await createServer({ host: '127.0.0.1', port: 4100, debug: { request:  ['*'], log: ['*'] } });    
-    const proxy = await createProxy({ host: '127.0.0.1', port: 4200, debug: { request:  ['*'], log: ['*'] } });
+    // const proxy = await createProxy({ host: '127.0.0.1', port: 4200, debug: { request:  ['*'], log: ['*'] } });
 
-    await proxy.start();
+    // await proxy.start();
     await server.start();
 }
 

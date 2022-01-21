@@ -1,0 +1,10 @@
+admin:
+  port: 9990
+  ip: 0.0.0.0
+
+routers:
+- protocol: http
+  dtab: /svc => /$/inet/127.0.0.1/4100;
+  servers:
+  - port: 4200
+    ip: 0.0.0.0
